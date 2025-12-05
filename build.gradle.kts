@@ -15,7 +15,6 @@ allprojects {
 
         maven(url = "https://jitpack.io")
         maven(url = "https://repo.papermc.io/repository/maven-public/")
-        maven(url = "https://nexus.leonardbausenwein.de/repository/maven-public/")
         maven(url = "https://repo.infernalsuite.com/repository/maven-snapshots/")
         maven(url = "https://repo.rapture.pw/repository/maven-releases/")
         maven(url = "https://maven.noxcrew.com/public/")
