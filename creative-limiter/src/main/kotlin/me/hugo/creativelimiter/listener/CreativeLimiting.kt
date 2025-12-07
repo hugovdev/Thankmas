@@ -8,11 +8,13 @@ import org.bukkit.entity.*
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBurnEvent
+import org.bukkit.event.block.BlockDispenseEvent
 import org.bukkit.event.block.BlockExplodeEvent
 import org.bukkit.event.block.BlockIgniteEvent
 import org.bukkit.event.block.BlockSpreadEvent
 import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.entity.EntitySpawnEvent
+import org.bukkit.event.vehicle.VehicleCreateEvent
 import org.bukkit.event.weather.WeatherChangeEvent
 import org.koin.core.annotation.Single
 
@@ -41,6 +43,50 @@ public class CreativeLimiting(private val main: CreativeLimiter) : Listener {
 
         val entityList =
             event.location.world.entities.filter { currentEntity -> !allowedEntityBypass.contains(currentEntity.type) }
+
+        if (entityList.size >= ENTITY_LIMIT) {
+            Bukkit.getLogger()
+                .warning("Entity spawn limit has been reached. Aborted spawn of entity " + entity.type.name + ".")
+            event.isCancelled = true
+
+            return
+        }
+
+        if (allowedEntityBypass.contains(entity.type)) return
+
+        currentEntities = entityList.size + 1
+        updateBoardTags("entities")
+    }
+
+    @EventHandler
+    public fun onEntitySpawn(event: BlockDispenseEvent) {
+        val entityList = event.block.world.entities.filter { currentEntity -> !allowedEntityBypass.contains(currentEntity.type) }
+
+        if (entityList.size >= ENTITY_LIMIT) {
+            Bukkit.getLogger()
+                .warning("Entity spawn limit has been reached. Aborted spawn of entity Item from Dispenser.")
+            event.isCancelled = true
+
+            return
+        }
+
+        currentEntities = entityList.size + 1
+        updateBoardTags("entities")
+    }
+
+
+    @EventHandler
+    public fun onEntitySpawn(event: VehicleCreateEvent) {
+        val entity = event.vehicle
+
+        if (entity is Player) return
+
+        if (entity is Wither || entity is EnderDragon || entity is Warden) {
+            event.isCancelled = true
+            return
+        }
+
+        val entityList = event.vehicle.world.entities.filter { currentEntity -> !allowedEntityBypass.contains(currentEntity.type) }
 
         if (entityList.size >= ENTITY_LIMIT) {
             Bukkit.getLogger()
